@@ -9,6 +9,7 @@ import Employees from "./pages/Employees"
 import Dashboard from "./pages/Dashboard"
 import Attendance from "./pages/Attendance"
 import Layout from "./pages/Layout"
+import LoginForm from "./components/LoginForm"
 
 const App = () => {
   return (
