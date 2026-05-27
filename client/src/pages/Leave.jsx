@@ -1,38 +1,50 @@
 import { useCallback, useEffect, useState } from "react"
-import {UmbrellaIcon, ThermometerIcon, PalmtreeIcon, PlusIcon} from "lucide-react"
+import { UmbrellaIcon, ThermometerIcon, PalmtreeIcon, PlusIcon } from "lucide-react"
 import { dummyLeaveData } from "../assets/assets"
 import LeaveHistory from "../components/leave/LeaveHistory"
 import ApplyLeaveModal from "../components/leave/ApplyLeaveModal"
+import { useAuth } from "../context/AuthContext"
+import { toast } from "react-toastify"
+import api from "../api/axios"
 
 const Leave = () => {
+  const { user } = useAuth()
   const [leaves, setLeaves] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [isDeleted, setIsdeleted] = useState(false)
-  const isAdmin = false;
+  const isAdmin = user?.role === "ADMIN";
 
-  const fetchLeaves = useCallback(()=>{
-    setLeaves(dummyLeaveData)
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  },[])
+  const fetchLeaves = useCallback(async () => {
+    try {
+      const res = await api.get('/leave')
+      setLeaves(res.data.data || [])
+      if (res.data.employee?.isDeleted) setIsdeleted(true)
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchLeaves()
-  },[fetchLeaves])
+  }, [fetchLeaves])
 
-  if(loading) return <loading />
-
-  const approvedLeaves = leaves.filter((l)=>l.status === 'APROVED');
-  const sickCount = approvedLeaves.filter((l)=>l.type === "SICK").length;
-  const casualCount = approvedLeaves.filter((l)=>l.type === "CASUAL").length;
-  const annualCount = approvedLeaves.filter((l)=>l.type === "ANNUAL").length;
+  if (loading) return (
+    <div className="flex justify-center items-center p-10">
+      Loading...
+    </div>
+  )
+  const approvedLeaves = leaves.filter((l) => l.status === 'APPROVED');
+  const sickCount = approvedLeaves.filter((l) => l.type === "SICK").length;
+  const casualCount = approvedLeaves.filter((l) => l.type === "CASUAL").length;
+  const annualCount = approvedLeaves.filter((l) => l.type === "ANNUAL").length;
 
   const leaveStats = [
-    {label: "Sick Leave", value: sickCount, icon: ThermometerIcon},
-    {label: "Casual Leave", value: casualCount, icon: UmbrellaIcon},
-    {label: "Annual Leave", value: annualCount, icon: PalmtreeIcon}
+    { label: "Sick Leave", value: sickCount, icon: ThermometerIcon },
+    { label: "Casual Leave", value: casualCount, icon: UmbrellaIcon },
+    { label: "Annual Leave", value: annualCount, icon: PalmtreeIcon }
   ]
 
   return (
@@ -44,16 +56,16 @@ const Leave = () => {
           <p className="page-subtitle">{isAdmin ? "Manage leave application" : "Your leave history and requests"}</p>
         </div>
         {!isAdmin && !isDeleted && (
-          <button onClick={()=> setShowModal(true)} className="btn-primary
+          <button onClick={() => setShowModal(true)} className="btn-primary
           flex items-center gap-2 w-full sm:w-auto justify-center">
-            <PlusIcon className="w-4 h-4"/> Apply for Leave
+            <PlusIcon className="w-4 h-4" /> Apply for Leave
           </button>
         )}
       </div>
       {!isAdmin && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5
         mb-8">
-          {leaveStats.map((s)=>(
+          {leaveStats.map((s) => (
             <div key={s.label} className="card card-hover p-5 sm:p-6 flex
             items-center gap-4 relative overflow-hidden group">
               <div className="absolute left-0 top-0 bottom-0 w-1
@@ -63,20 +75,20 @@ const Leave = () => {
                 <s.icon className="w-5 h-5 text-slate-600
                 group-hover:text-indigo-600 transition-colors
                 duration-200"/>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">{s.label}</p>
-                   <p className="text-2xl font-bold text-slate-900
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">{s.label}</p>
+                <p className="text-2xl font-bold text-slate-900
                    tracking-tight">{s.value} <span className="text-sm font-normal
                    text-slate-400">taken</span></p>
-                  </div>
               </div>
+            </div>
           ))}
-          </div>
+        </div>
       )}
-      <LeaveHistory leaves={leaves} isAdmin={isAdmin} onUpdate={fetchLeaves}/>
-      <ApplyLeaveModal open={showModal} onClose={()=> setShowModal(false)}
-        onSucess={fetchLeaves}/>
+      <LeaveHistory leaves={leaves} isAdmin={isAdmin} onUpdate={fetchLeaves} />
+      <ApplyLeaveModal open={showModal} onClose={() => setShowModal(false)}
+        onSuccess={fetchLeaves} />
     </div>
   )
 }

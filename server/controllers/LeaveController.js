@@ -6,8 +6,10 @@ import LeaveApplication from "../models/LeaveApplication.js";
 // POST /api/leaves
 export const createLeave = async (req, res) => {
   try {
-    const session = req.session;
-    const employee = await Employee.findOne({ userId: session.userId });
+    console.log(req.user);
+    const user = req.user;
+    const employee = await Employee.findOne({ userId: user.userId});
+    console.log("EMPLOYEE", employee)
     if (!employee) return res.status(404).json({ error: "Employee not found" });
     if (employee.isDeleted) {
       return res.status(403).json({
@@ -15,7 +17,7 @@ export const createLeave = async (req, res) => {
       });
     }
 
-    const { type, startdate, endDate, reason } = req.body;
+    const { type, startDate, endDate, reason } = req.body;
 
     if (!type || !startDate || !endDate || !reason) {
       return res.status(400).json({ error: "Missing fields" });
@@ -44,6 +46,8 @@ export const createLeave = async (req, res) => {
       status: "PENDING",
     });
 
+    console.log("CREATE LEAVE HIT");
+
     await inngest.send({
       name: "leave/pending",
       data: {leaveApplicationId: leave._id,}
@@ -51,7 +55,8 @@ export const createLeave = async (req, res) => {
 
     return res.json({ success: true, data: leave });
   } catch (error) {
-    return res.json({ error: "Failed" });
+    console.log(error);
+    return res.json({ error: error.message });
   }
 };
 
@@ -59,8 +64,8 @@ export const createLeave = async (req, res) => {
 // GET /api/leaves
 export const getLeaves = async (req, res) => {
   try {
-    const session = req.session;
-    const isAdmin = session.role === "ADMIN";
+    const user = req.user;
+    const isAdmin = user.role?.toLowerCase() === "admin";
     if (isAdmin) {
       const status = req.query.status;
       const where = status ? { status } : {};
@@ -79,7 +84,7 @@ export const getLeaves = async (req, res) => {
       return res.json({ data });
     } else {
       const employee = await Employee.findOne({
-        userId: session.userId,
+        userId: user.userId,
       }).lean();
       if (!employee)
         return res.status(404).json({

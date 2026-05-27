@@ -10,8 +10,8 @@ export const getEmployees = async (req, res) => {
     const where = {};
     if (department) where.department = department;
 
-    const employees = (await Employee.find(where))
-      .toSorted({ createdAt: -1 })
+    const employees = await Employee.find(where)
+      .sort({ createdAt: -1 })
       .populate("userId", "email role")
       .lean();
 
@@ -49,9 +49,16 @@ export const createEmployees = async (req, res) => {
     } = req.body;
 
     if (!email || !password || !lastName || !firstName) {
-      return res.status(400).json({ error: "Missing reqiured fields" });
+
+      return res.status(400).json({ 
+        error: "Missing reqiured fields" 
+      });
+    }
+
 
       const hashed = await bcrypt.hash(password, 10);
+
+
       const user = await User.create({
         email,
         password: hashed,
@@ -74,7 +81,7 @@ export const createEmployees = async (req, res) => {
       });
 
       return res.status(201).json({ success: true, employee });
-    }
+    
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ error: "Email already exist" });
@@ -102,6 +109,7 @@ export const UpdateEmployees = async (req, res) => {
       role,
       bio,
       employmentStatus,
+      password
     } = req.body;
 
     const employee = await Employee.findById(id);

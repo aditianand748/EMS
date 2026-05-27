@@ -2,6 +2,7 @@ import { Inngest } from "inngest";
 import Attendance from "../models/Attendance.js";
 import LeaveApplication from "../models/LeaveApplication.js";
 import sendEmail from "../config/nodemailer.js";
+import Employee from "../models/Employee.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "fullstack-ems" });
@@ -123,7 +124,7 @@ const attendanceReminderCron = inngest.createFunction(
      // get employees IDS on approved leave today
      const onLeaveIds = await step.run("get-on-leave-ids", async() => {
         const leaves = await LeaveApplication.find({
-          status: "APROVED",
+          status: "APPROVED",
           startDate: { $lte: new Date(today.endUTC) },
           endDate: { $gte: new Date(today.startUTC) },
         }).lean();

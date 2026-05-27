@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 
-export const protect = (req, res, neat) => {
+export const protect = (req, res, next) => {
   try {
+    console.log("Auth header:", req.headers.authorization);
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startWith("Bearer ")) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const token = authHeader.split(" ")[1];
@@ -12,6 +13,7 @@ export const protect = (req, res, neat) => {
     if (!session) {
       return res.status(401).json({ error: "Unauthorized " });
     }
+    req.user = session;
     req.session = session;
     next();
   } catch (error) {
@@ -20,8 +22,13 @@ export const protect = (req, res, neat) => {
 };
 
 export const protectAdmin = (req, res, next) => {
-  if (req?.session?.role !== "ADMIN") {
+
+
+  if (!req?.user || req.user.role !== "admin") {
     return res.status(403).json({ error: "Admin access required" });
   }
   next();
 };
+
+
+

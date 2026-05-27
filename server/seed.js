@@ -34,7 +34,7 @@ async function registerAdmin(){
          console.log("Admin user created")
          console.log("\nemail:", admin.email);
          console.log("password:", TemporaryPassword);
-         console.log("/n change the password after login");
+         console.log("\n change the password after login");
 
          process.exit(0);
     } catch (error) {

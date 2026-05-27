@@ -50,7 +50,7 @@ export const login = async (req, res) => {
 // get session for empployee and admin
 // Get /api/auth/session
 export const session = (req, res) => {
-  const session = req.session;
+  const session = req.user;
   return res.json({ user: session });
 };
 
@@ -75,3 +75,6 @@ export const changePassword = async (req, res) => {
     return res.status(500).json({ error: "Failed to cahnge password" });
   }
 };
+
+
+

@@ -1,19 +1,23 @@
 import { Loader2Icon, LogInIcon, LogOutIcon } from 'lucide-react'
 import React, { useState } from 'react'
+import { toast } from 'react-toastify'
 
-const CheckInButton = ({todayRecord, onAction}) => {
+const CheckInButton = ({ todayRecord, onAction }) => {
     const [loading, setLoading] = useState(false)
 
     const handleAttendance = async () => {
         setLoading(true)
-        setTimeout(()=>{
-            setLoading(false)
+        try {
+            await api.post("/attendance")
             onAction()
-        },1000)
+        } catch (error) {
+            toast.error(error?.response?.data?.error || error?.message);
+        }
+        setLoading(false)
     }
 
-    if(todayRecord?.checkout){
-        return(
+    if (todayRecord?.checkout) {
+        return (
             <div className='flex flex-col items-center justify-center p-8 bg-slate-50
             rounded-2xl border border-slate-200'>
                 <h3 className='text-lg font-bold text-slate-900'>Work Day Completed</h3>
@@ -23,25 +27,25 @@ const CheckInButton = ({todayRecord, onAction}) => {
     }
 
 
-    const isCheckedIn = !todayRecord?.isCheckedIn;
-  return (
-    <div className='absolute bottom-4 right-4 flex flex-col z-1'>
-        <button onClick={handleAttendance} disabled={loading} className={`w-full max-w-xs flex justify-between items-center gap-8
+    const isCheckedIn = !todayRecord?.checkIn;
+    return (
+        <div className='absolute bottom-4 right-4 flex flex-col z-1'>
+            <button onClick={handleAttendance} disabled={loading} className={`w-full max-w-xs flex justify-between items-center gap-8
             p-4 rounded-xl bg-linear-to-br text-white ${isCheckedIn ? "from-slate-700 to-slate-900"
-                : "from-indigo-600 to-indigo-900"
-            }`}>
+                    : "from-indigo-600 to-indigo-900"
+                }`}>
 
-            {loading ? <Loader2Icon className='size-7 animate-spin'/> : isCheckedIn ? 
-            <LogOutIcon className='size-7'/> : <LogInIcon className='size-7'/>}
+                {loading ? <Loader2Icon className='size-7 animate-spin' /> : isCheckedIn ?
+                    <LogOutIcon className='size-7' /> : <LogInIcon className='size-7' />}
 
-            <div className='relative flex flex-col items-center text-center'>
-                <h2 className='text-lg font-medium mb-1'>{loading ? "Processing..." : isCheckedIn ? "Clock Out" : "Clock In"}</h2>
-                <p className='text-xs opacity-80'>{isCheckedIn ? "Click to end your shift" : "start your work day"}</p>
-            </div>
-        </button>
+                <div className='relative flex flex-col items-center text-center'>
+                    <h2 className='text-lg font-medium mb-1'>{loading ? "Processing..." : isCheckedIn ? "Clock Out" : "Clock In"}</h2>
+                    <p className='text-xs opacity-80'>{isCheckedIn ? "Click to end your shift" : "start your work day"}</p>
+                </div>
+            </button>
 
-    </div>
-  )
+        </div>
+    )
 }
 
 export default CheckInButton

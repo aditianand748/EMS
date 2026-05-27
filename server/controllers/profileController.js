@@ -3,7 +3,7 @@ import Employee from "../models/Employee.js";
 // Get /api/profile
 export const getProfile = async (req, res) => {
   try {
-    const session = req.session;
+    const session = req.user;
     const employee = await Employee.findOne({ userId: session.userId });
     if (!employee) {
       //Authenticated user is not an employee -return admin profile
@@ -13,9 +13,11 @@ export const getProfile = async (req, res) => {
         email: session.email,
       });
     }
-    return res.json(empployee);
+    return res.json(employee);
   } catch (error) {
-    return res.status(500).json({ error: "Failed to fetch profile" });
+    console.error("Profile error", error)
+
+    return res.status(500).json({ error: "Failed to fetch profile", });
   }
 };
 
@@ -23,7 +25,7 @@ export const getProfile = async (req, res) => {
 //PUT /apip/profile
 export const updateProfile = async (req, res) => {
   try {
-    const session = req.session;
+    const session = req.user;
     const employee = await Employee.findOne({ userId: session.userId });
     if (!employee) return res.status(404).json({ error: "employee not found" });
     if (employee.isDeleted) {
