@@ -1,6 +1,7 @@
 import { Loader2Icon, LogInIcon, LogOutIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
+import api from '../../api/axios'
 
 const CheckInButton = ({ todayRecord, onAction }) => {
     const [loading, setLoading] = useState(false)

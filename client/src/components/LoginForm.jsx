@@ -29,11 +29,14 @@ const LoginForm = ({ role, title, subtitle }) => {
       await refreshSession();
       navigate("/dashboard");
     } catch (error) {
+      console.log("user error", error);
       toast.error(error.response?.data?.error || error.message || "Login failed")
+
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <div className='min-h-screen flex flex-col md:flex-row'>
@@ -103,6 +106,8 @@ const LoginForm = ({ role, title, subtitle }) => {
                 className="animate-spin h-4 w-4 mr-2" />}
               Sign in
             </button>
+
+
 
           </form>
 
