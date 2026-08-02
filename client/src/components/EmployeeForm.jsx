@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 const EmployeeForm = ({ initialData, onSuccess, onCancel }) => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
-    const isEditMode = !initialData;
+    const isEditMode = Boolean(initialData);
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -21,7 +21,7 @@ const EmployeeForm = ({ initialData, onSuccess, onCancel }) => {
         }
 
         try {
-            const url = isEditMode ? `/employees/${initialData.id}` : "/employees";
+            const url = isEditMode ? `/employees/${initialData?.id}` : "/employees";
             const method = isEditMode ? "put" : "post";
             await api[method](url, formData)
             onSuccess ? onSuccess() : navigate("/employees")
@@ -56,7 +56,7 @@ const EmployeeForm = ({ initialData, onSuccess, onCancel }) => {
                     </div>
                     <div>
                         <label className="block mb-2">Phone Number</label>
-                        <input type="Phone" required defaultValue={initialData?.phone} />
+                        <input type="tel" name="phone" required defaultValue={initialData?.phone} />
                     </div>
                     <div>
                         <label className="block mb-2">join Date</label>

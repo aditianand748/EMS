@@ -1,4 +1,5 @@
 import Payslip from "../models/Payslip.js";
+import Employee from "../models/Employee.js";
 
 export const createPayslip = async (req, res) => {
   try {
